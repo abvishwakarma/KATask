@@ -24,9 +24,10 @@ public class TransactionItemsDetailCalloutQueuable implements Queueable, Databas
     }
     
     //Method for actualt REST API Callout for the the Request #1 & Request #2 respectively
-    public static HttpResponse makeCallout(List<TransactionItem__c> transactionItemsDetails, String configName){
+    public static HttpResponse makeCallout(List<sObject> transactionItemsDetails, String configName){
         
         AuthCredentials__mdt objAuthCredentials = getAllAuthData(configName);
+		
         HttpRequest request = new HttpRequest();
         request.setMethod(objAuthCredentials.Method__c);
         request.setEndpoint(objAuthCredentials.EndPoint__c);
@@ -48,7 +49,8 @@ public class TransactionItemsDetailCalloutQueuable implements Queueable, Databas
                 WHERE Transaction__c IN: filteredTransactiontoRequest]; 
     }
     
-    //Get Transaction details and check the map key set values 
+    //PE-31543 JIRa ticket which is to get the transaction details and storing the results in map 
+	//
     public List<Transaction__c> getTransactionDetails(Map<Id,Integer> mapTransItemsDetailsCount){
         
         return [select Id, Total_Cost__c, 
@@ -110,14 +112,13 @@ public class TransactionItemsDetailCalloutQueuable implements Queueable, Databas
            
            //try block 
            try{
-                 response = makeCallout(transactionItemsDetails,'AuthCredentialsPOST');
-                System.debug('--Check Response---');
+                
+                response = makeCallout(filterAllTransactions,'AuthCredentialsPOST');
             }
             //catch block 
             Catch(Exception ex){
                 System.debug('---Exception message-----'+ex.getMessage());
             }
          }
-        
     }
 }
